@@ -1,0 +1,2 @@
+from ia import RedeNeural
+
