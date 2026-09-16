@@ -1,21 +1,26 @@
 from typing import Callable, Any, Optional
-from random import randint
+from random import randint, choice
+from string import ascii_lowercase, digits
 import uuid
 
 red   = '\033[31m'
 green = '\033[32m'
 reset = '\033[0m'
+ASCII = ascii_lowercase + digits
 
-type NeuronCallback = Callable[['Neuronio'], Any] # NeuronWrapper
+type NeuronCallback = Callable[['Neuronio'], Any]
 
 def peso_aleatorio():
     return randint(0, 10)
+
+def simple_id():
+    return choice(ASCII) + choice(ASCII)
 
 class Neuronio:
     def __init__(self, conexoes: dict[int, Neuronio], callback: Optional[NeuronCallback] = None):
         self.conexoes = conexoes
         self.callback = callback
-        self.id = str(uuid.uuid4())[:2]
+        self.id = simple_id()
     
     def disparar(self):
         if self.callback:
@@ -61,7 +66,6 @@ class RedeNeural:
                 )
                 if last:
                     n.conexoes[peso_aleatorio()] = last
-                    last.conexoes[peso_aleatorio()] = n
                 last = n
                 output.append(n)
         
