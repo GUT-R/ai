@@ -6,20 +6,20 @@ red   = '\033[31m'
 green = '\033[32m'
 reset = '\033[0m'
 
-type NeuronWrapper = Callable[['Neuronio'], Any]
+type NeuronCallback = Callable[['Neuronio'], Any] # NeuronWrapper
 
 def peso_aleatorio():
     return randint(0, 10)
 
 class Neuronio:
-    def __init__(self, conexoes: dict[int, Neuronio], wrapper: Optional[NeuronWrapper] = None):
+    def __init__(self, conexoes: dict[int, Neuronio], callback: Optional[NeuronCallback] = None):
         self.conexoes = conexoes
-        self.wrapper = wrapper
+        self.callback = callback
         self.id = str(uuid.uuid4())[:2]
     
     def disparar(self):
-        if self.wrapper:
-            self.wrapper(self)
+        if self.callback:
+            self.callback(self)
         for peso, neuronio in self.conexoes.items():
             if peso <= 5:
                 neuronio.disparar()
@@ -31,14 +31,17 @@ class Neuronio:
         return self.id + '(' + ', '.join(map(lambda x: x.id, self.conexoes.values())) + ')'
 
 def colorized_log(color):
-    def callback(n: Neuronio):
+    def wrapper(n: Neuronio):
         print(f'{color}[{n.id} DISPARADO]{reset}')
-    return callback
+    return wrapper
 
 class RedeNeural:
-    def __init__(self, layers: tuple[int], input_wrapper: Call):
+    def __init__(self, layers: tuple[int], input_callback: Optional[NeuronCallback]=None, process_callback: Optional[NeuronCallback]=None, output_callback: Optional[NeuronCallback]=None):
         self.layers = [layer for layer in layers if layer != 0]
         self.network: dict[int, list[Neuronio]] = {}
+        self.inpt_callback = input_callback
+        self.proc_callback = process_callback
+        self.otp_callback  = output_callback
         self.random_network()
             
     def random_network(self, i: Optional[int]=None):
@@ -54,7 +57,7 @@ class RedeNeural:
             for _ in range(layer):
                 n = Neuronio(
                     { peso_aleatorio(): neuronio for neuronio in self.random_network(i + 1) },
-                    wrapper=colorized_log(color='')
+                    callback=self.proc_callback
                 )
                 if last:
                     n.conexoes[peso_aleatorio()] = last
@@ -66,14 +69,13 @@ class RedeNeural:
             for _ in range(layer):
                 output.append(Neuronio(
                     {peso_aleatorio(): neuronio for neuronio in self.random_network(i + 1)},
-                    wrapper=colorized_log(color=red)
+                    callback=self.inpt_callback
                 ))
         else:
             for _ in range(layer):
                 output.append(Neuronio(
-                    {}, wrapper=colorized_log(color=green)
+                    {}, callback=self.otp_callback
                 ))
-                self.current_node += 1
         
         self.network[i] = output
         return output
