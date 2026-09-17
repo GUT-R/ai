@@ -83,3 +83,4 @@ class RedeNeural:
         
         self.network[i] = output
         return output
+        # eu acho que funcionou
