@@ -1,4 +1,5 @@
 from ia import RedeNeural
+
 def exibir_modelo():
     camadas = (3, 5, 2)
     rede_neural = RedeNeural(camadas)

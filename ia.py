@@ -14,10 +14,10 @@ def peso_aleatorio():
     return randint(0, 10)
 
 def simple_id():
-    return choice(ASCII) + choice(ASCII)
+    return ''.join(choice(ASCII) for _ in range(3))
 
 class Neuronio:
-    def __init__(self, conexoes: dict[int, Neuronio], callback: Optional[NeuronCallback] = None):
+    def __init__(self, conexoes: dict['Neuronio', int], callback: Optional[NeuronCallback] = None):
         self.conexoes = conexoes
         self.callback = callback
         self.id = simple_id()
@@ -25,7 +25,7 @@ class Neuronio:
     def disparar(self):
         if self.callback:
             self.callback(self)
-        for peso, neuronio in self.conexoes.items():
+        for neuronio, peso in self.conexoes.items():
             if peso <= 5:
                 neuronio.disparar()
 
@@ -33,7 +33,7 @@ class Neuronio:
         return self.id
 
     def __repr__(self):
-        return self.id + '(' + ', '.join(map(lambda x: x.id, self.conexoes.values())) + ')'
+        return self.id + '(' + ', '.join(map(lambda x: x.id, self.conexoes.keys())) + ')'
 
 def colorized_log(color):
     def wrapper(n: Neuronio):
@@ -52,27 +52,31 @@ class RedeNeural:
     def random_network(self, i: Optional[int]=None):
         i = i or 0
         layer = self.layers[i]
+
         if layer == 0:
             raise ValueError('Uma camada não pode conter 0 neurônios')
 
+        if len(self.get(i, [])) == layer:
+            return self[i]
+        
         output = []
 
         if 0 < i < len(self.layers) - 1:
             last = None
             for _ in range(layer):
                 n = Neuronio(
-                    { peso_aleatorio(): neuronio for neuronio in self.random_network(i + 1) },
+                    { neuronio: peso_aleatorio() for neuronio in self.random_network(i + 1) },
                     callback=self.proc_callback
                 )
                 if last:
-                    n.conexoes[peso_aleatorio()] = last
+                    n.conexoes[last] = peso_aleatorio()
                 last = n
                 output.append(n)
         
         elif i == 0:
             for _ in range(layer):
                 output.append(Neuronio(
-                    {peso_aleatorio(): neuronio for neuronio in self.random_network(i + 1)},
+                    { neuronio: peso_aleatorio() for neuronio in self.random_network(i + 1) },
                     callback=self.inpt_callback
                 ))
         else:
@@ -89,5 +93,3 @@ class RedeNeural:
 
     def __getitem__(self, key):
         return self.network[key]
-
-        # eu acho que funcionou
