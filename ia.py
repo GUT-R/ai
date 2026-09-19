@@ -10,14 +10,26 @@ ASCII = ascii_lowercase + digits
 
 type NeuronCallback = Callable[['Neuronio'], Any]
 
-def peso_aleatorio():
-    return randint(0, 10)
-
 def simple_id():
     return ''.join(choice(ASCII) for _ in range(3))
 
+class RandomInteger:
+    def __init__(self):
+        self.value = 0
+        self.random()
+    def __lt__(self, other: int):
+        return self.value < other
+    def __le__(self, other: int):
+        return self.value <= other
+    def __gt__(self, other: int):
+        return self.value > other
+    def __ge__(self, other: int):
+        return self.value >= other
+    def random(self):
+        self.value = randint(0, 10)
+
 class Neuronio:
-    def __init__(self, conexoes: dict['Neuronio', int], callback: Optional[NeuronCallback] = None):
+    def __init__(self, conexoes: dict['Neuronio', int | RandomInteger], callback: Optional[NeuronCallback] = None):
         self.conexoes = conexoes
         self.callback = callback
         self.id = simple_id()
@@ -47,11 +59,18 @@ class RedeNeural:
         self.inpt_callback = input_callback
         self.proc_callback = process_callback
         self.otp_callback  = output_callback
+        self.teto_territory: list[RandomInteger] = []
         self.random_network()
-            
-    def random_network(self, i: Optional[int]=None):
-        i = i or 0
+
+    def _random_weight(self):
+        random_value = RandomInteger()
+        self.teto_territory.append(random_value)
+        return random_value
+
+    def random_network(self, i: int=0) -> list[Neuronio]:
         layer = self.layers[i]
+
+        peso_aleatorio = self._random_weight
 
         if layer == 0:
             raise ValueError('Uma camada não pode conter 0 neurônios')
