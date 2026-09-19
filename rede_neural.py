@@ -54,7 +54,7 @@ def colorized_log(color: str):
     return wrapper
 
 class RedeNeural:
-    def __init__(self, layers: tuple[int], input_callback: Optional[NeuronCallback]=None, process_callback: Optional[NeuronCallback]=None, output_callback: Optional[NeuronCallback]=None):
+    def __init__(self, layers: tuple[int, ...], input_callback: Optional[NeuronCallback]=None, process_callback: Optional[NeuronCallback]=None, output_callback: Optional[NeuronCallback]=None):
         self.layers = [layer for layer in layers if layer != 0]
         self.network: dict[int, list[Neuronio]] = {}
         self.inpt_callback = input_callback
@@ -116,3 +116,6 @@ class RedeNeural:
 
     def get(self, key: int, default: _T=None) -> list[Neuronio] | _T:
         return self.network.get(key, default)
+
+    def treinar(self, objetivo: tuple[ tuple[tuple[bool, ...], tuple[bool, ...]], ... ]):
+        ...        
