@@ -1,12 +1,13 @@
-from typing import Callable, Any, Optional
+from typing import Callable, Any, Optional, TypeVar
 from random import randint, choice
 from string import ascii_lowercase, digits
-import uuid
 
 red   = '\033[31m'
 green = '\033[32m'
 reset = '\033[0m'
 ASCII = ascii_lowercase + digits
+
+_T = TypeVar('_T')
 
 type NeuronCallback = Callable[['Neuronio'], Any]
 
@@ -47,7 +48,7 @@ class Neuronio:
     def __repr__(self):
         return self.id + '(' + ', '.join(map(lambda x: x.id, self.conexoes.keys())) + ')'
 
-def colorized_log(color):
+def colorized_log(color: str):
     def wrapper(n: Neuronio):
         print(f'{color}[{n.id} DISPARADO]{reset}')
     return wrapper
@@ -78,7 +79,7 @@ class RedeNeural:
         if len(self.get(i, [])) == layer:
             return self[i]
         
-        output = []
+        output: list[Neuronio] = []
 
         if 0 < i < len(self.layers) - 1:
             last = None
@@ -110,5 +111,8 @@ class RedeNeural:
     def __len__(self):
         return len(self.network)
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: int):
         return self.network[key]
+
+    def get(self, key: int, default: _T=None) -> list[Neuronio] | _T:
+        return self.network.get(key, default)
