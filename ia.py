@@ -83,4 +83,11 @@ class RedeNeural:
         
         self.network[i] = output
         return output
+
+    def __len__(self):
+        return len(self.network)
+
+    def __getitem__(self, key):
+        return self.network[key]
+
         # eu acho que funcionou

@@ -1,5 +1,12 @@
 from ia import RedeNeural
-from pprint import pprint
+def exibir_modelo():
+    camadas = (3, 5, 2)
+    rede_neural = RedeNeural(camadas)
+    for i in range(len(rede_neural)):
+        camada = rede_neural[i]
+        print(f'[{i}] {camada}')
 
-rede_neural = RedeNeural((3, 5, 2))
-pprint(rede_neural.network)
+for i in range(10):
+    print(f'----- GERAÇÂO ALEATÓRIA {i} -----')
+    exibir_modelo()
+    print(f'---------------------------------')
