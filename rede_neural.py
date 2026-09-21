@@ -18,35 +18,42 @@ class RandomInteger:
     def __init__(self):
         self.value = 0
         self.random()
-    def __lt__(self, other: int):
+    def __lt__(self, other: int | float):
         return self.value < other
-    def __le__(self, other: int):
+    def __le__(self, other: int | float):
         return self.value <= other
-    def __gt__(self, other: int):
+    def __gt__(self, other: int | float):
         return self.value > other
-    def __ge__(self, other: int):
+    def __ge__(self, other: int | float):
         return self.value >= other
     def random(self):
         self.value = randint(0, 10)
 
 class Neuronio:
-    def __init__(self, conexoes: dict['Neuronio', int | RandomInteger], callback: Optional[NeuronCallback] = None):
+    def __init__(self, conexoes: dict['Neuronio', float | int | RandomInteger], callback: Optional[NeuronCallback] = None):
         self.conexoes = conexoes
         self.callback = callback
+        self.carga = 0.0
         self.id = simple_id()
     
     def disparar(self):
         if self.callback:
             self.callback(self)
         for neuronio, peso in self.conexoes.items():
-            if peso <= 5:
-                neuronio.disparar()
+            if self.carga > peso:
+                neuronio.carga += self.carga
+                yield neuronio
+        self.carga = 0.0
+
 
     def __str__(self):
         return self.id
 
     def __repr__(self):
         return self.id + '(' + ', '.join(map(lambda x: x.id, self.conexoes.keys())) + ')'
+
+    def __bool__(self):
+        return self.carga > 0
 
 def colorized_log(color: str):
     def wrapper(n: Neuronio):
@@ -67,6 +74,9 @@ class RedeNeural:
         random_value = RandomInteger()
         self.teto_territory.append(random_value)
         return random_value
+
+    def randomize_all(self):
+        tuple(map(lambda x: x.random(), self.teto_territory))
 
     def random_network(self, i: int=0) -> list[Neuronio]:
         layer = self.layers[i]
@@ -117,5 +127,38 @@ class RedeNeural:
     def get(self, key: int, default: _T=None) -> list[Neuronio] | _T:
         return self.network.get(key, default)
 
+
+    def efetuar_input(self, input: tuple[bool, ...]):
+        neuronios_de_entrada: set[Neuronio] = set()
+        for neuronio, deve_ativar in zip(self.network[0], input):
+            if deve_ativar:
+                neuronio.carga += 1
+                neuronios_de_entrada.add(neuronio)
+        return self.disparo_em_cadeia(a_partir_de=neuronios_de_entrada)
+    
+    def disparo_em_cadeia(self, a_partir_de: set[Neuronio]):
+        neuronios = a_partir_de
+        novos_neuronios: set[Neuronio] = set()
+        for neuronio in neuronios:
+            novos_neuronios.update(neuronio.disparar())
+        if not novos_neuronios:
+            return novos_neuronios
+        self.disparo_em_cadeia(a_partir_de=novos_neuronios)
+        return novos_neuronios
+
+    def obter_saida(self) -> tuple[bool, ...]:
+        return tuple(map(bool, self.network[len(self) - 1]))
+
     def treinar(self, objetivo: tuple[ tuple[tuple[bool, ...], tuple[bool, ...]], ... ]):
-        ...        
+        concluido = False
+        while not concluido:
+            concluido = True
+            for input, task in objetivo:
+                self.efetuar_input(input)
+                if self.obter_saida() != task:
+                    self.randomize_all()
+                    concluido = False
+                    break
+
+    def __str__(self) -> str:
+        return '\nAinda não tem exibição, animal.\n'
