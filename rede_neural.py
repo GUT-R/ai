@@ -104,16 +104,11 @@ class RedeNeural:
         output: list[Neuronio] = []
 
         if 0 < i < len(self.layers) - 1:
-            last = None
             for _ in range(layer):
-                n = Neuronio(
+                output.append(Neuronio(
                     { neuronio: peso_aleatorio() for neuronio in self.random_network(i + 1) },
                     callback=self.proc_callback
-                )
-                if last:
-                    n.conexoes[last] = peso_aleatorio()
-                last = n
-                output.append(n)
+                ))
         
         elif i == 0:
             for _ in range(layer):
