@@ -1,4 +1,4 @@
-from typing import Callable, Any, Optional, TypeVar
+from typing import Callable, Any, Optional, TypeVar, Iterable
 from random import randint, choice
 from string import ascii_lowercase, digits
 
@@ -15,9 +15,9 @@ def simple_id():
     return ''.join(choice(ASCII) for _ in range(3))
 
 class RandomInteger:
-    def __init__(self):
+    def __init__(self, max: int=10):
         self.value = 0
-        self.random()
+        self.random(max)
     def __lt__(self, other: int | float):
         return self.value < other
     def __le__(self, other: int | float):
@@ -26,8 +26,8 @@ class RandomInteger:
         return self.value > other
     def __ge__(self, other: int | float):
         return self.value >= other
-    def random(self):
-        self.value = randint(0, 10)
+    def random(self, max: int):
+        self.value = randint(0, max)
 
 class Neuronio:
     def __init__(self, conexoes: dict['Neuronio', float | int | RandomInteger], callback: Optional[NeuronCallback] = None):
@@ -68,7 +68,10 @@ class RedeNeural:
         self.proc_callback = process_callback
         self.otp_callback  = output_callback
         self.teto_territory: list[RandomInteger] = []
+        self.max_charging: int = sum(layers)
+        self.weight_history: set[list[int]] = set()
         self.random_network()
+        
 
     def _random_weight(self):
         random_value = RandomInteger()
@@ -76,7 +79,16 @@ class RedeNeural:
         return random_value
 
     def randomize_all(self):
-        tuple(map(lambda x: x.random(), self.teto_territory))
+        while True: # do-while fez falta aqui
+            l: list[int] = []
+
+            for x in self.teto_territory:
+                x.random(max=self.max_charging)
+                l.append(x.value)
+            
+            if l not in self.weight_history:
+                break
+        self.weight_history.add(l)
 
     def random_network(self, i: int=0) -> list[Neuronio]:
         layer = self.layers[i]
@@ -127,29 +139,33 @@ class RedeNeural:
     def get(self, key: int, default: _T=None) -> list[Neuronio] | _T:
         return self.network.get(key, default)
 
-
     def efetuar_input(self, input: tuple[bool, ...]):
         neuronios_de_entrada: set[Neuronio] = set()
+
         for neuronio, deve_ativar in zip(self.network[0], input):
             if deve_ativar:
                 neuronio.carga += 1
                 neuronios_de_entrada.add(neuronio)
+
         return self.disparo_em_cadeia(a_partir_de=neuronios_de_entrada)
     
     def disparo_em_cadeia(self, a_partir_de: set[Neuronio]):
         neuronios = a_partir_de
         novos_neuronios: set[Neuronio] = set()
+
         for neuronio in neuronios:
             novos_neuronios.update(neuronio.disparar())
+
         if not novos_neuronios:
             return novos_neuronios
+        
         self.disparo_em_cadeia(a_partir_de=novos_neuronios)
         return novos_neuronios
 
     def obter_saida(self) -> tuple[bool, ...]:
         return tuple(map(bool, self.network[len(self) - 1]))
 
-    def treinar(self, objetivo: tuple[ tuple[tuple[bool, ...], tuple[bool, ...]], ... ]):
+    def treinar(self, objetivo: Iterable[ tuple[tuple[bool, ...], tuple[bool, ...]] ]):
         concluido = False
         while not concluido:
             concluido = True
