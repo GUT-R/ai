@@ -38,8 +38,13 @@ class Neuronio:
         self.id = simple_id()
     
     def disparar(self):
+        if self.carga <= 0:
+            return
         if self.callback:
             self.callback(self)
+        if not self.conexoes:
+            return
+        
         for neuronio, peso in self.conexoes.items():
             if self.carga > peso:
                 neuronio.carga += self.carga
@@ -162,14 +167,25 @@ class RedeNeural:
 
     def treinar(self, objetivo: Iterable[ tuple[tuple[bool, ...], tuple[bool, ...]] ]):
         concluido = False
+        tentativa = 0
+        alcance = 0
+        objetivo_tam = len(objetivo) # type: ignore
+
         while not concluido:
             concluido = True
             for input, task in objetivo:
                 self.efetuar_input(input)
-                if self.obter_saida() != task:
+                resultado = self.obter_saida()
+                if resultado != task:
+                    print(f'Saída diferente: {resultado} | {task=}')
                     self.randomize_all()
                     concluido = False
                     break
+                alcance += 1
+            print(f'Tentativa: {tentativa}')
+            print(f'Alcance: {(alcance / objetivo_tam) * 100}%')
+            print(f'Possibilidades testadas: {len(self.weight_history)}')
+            tentativa += 1
 
     def __str__(self) -> str:
         return '\nAinda não tem exibição, animal.\n'
