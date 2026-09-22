@@ -1,5 +1,5 @@
-from openai import ia, OR
+from openai import ia, OR, COOL
 
-ia.treinar(objetivo=OR) # Usei força bruta no treinamento, então o código só vai terminar quando der sorte.
+ia.treinar(objetivo=COOL)
 
 print(ia)

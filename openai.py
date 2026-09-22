@@ -36,4 +36,10 @@ AND = (
         (False, True)
     ),
 )
+COOL = (
+    (
+        (False, True),
+        (False, False)
+    ),
+)
 ia = RedeNeural((2, 2, 2, 2))
