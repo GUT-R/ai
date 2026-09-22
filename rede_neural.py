@@ -17,7 +17,8 @@ def simple_id():
 class RandomInteger:
     def __init__(self, max: int=10):
         self.value = 0
-        self.random(max)
+        self.max = max
+        self.random()
     def __lt__(self, other: int | float):
         return self.value < other
     def __le__(self, other: int | float):
@@ -26,8 +27,8 @@ class RandomInteger:
         return self.value > other
     def __ge__(self, other: int | float):
         return self.value >= other
-    def random(self, max: int):
-        self.value = randint(0, max)
+    def random(self):
+        self.value = randint(0, self.max)
 
 class Neuronio:
     def __init__(self, conexoes: dict['Neuronio', float | int | RandomInteger], callback: Optional[NeuronCallback] = None):
@@ -69,22 +70,22 @@ class RedeNeural:
         self.otp_callback  = output_callback
         self.teto_territory: list[RandomInteger] = []
         self.max_charging: int = sum(layers)
-        self.weight_history: set[list[int]] = set()
+        self.weight_history: set[str] = set()
         self.random_network()
         
 
-    def _random_weight(self):
-        random_value = RandomInteger()
+    def _random_weight(self, max: int):
+        random_value = RandomInteger(max)
         self.teto_territory.append(random_value)
         return random_value
 
     def randomize_all(self):
         while True: # do-while fez falta aqui
-            l: list[int] = []
+            l = ""
 
             for x in self.teto_territory:
-                x.random(max=self.max_charging)
-                l.append(x.value)
+                x.random()
+                l += str(x.value) + ","
             
             if l not in self.weight_history:
                 break
@@ -106,14 +107,14 @@ class RedeNeural:
         if 0 < i < len(self.layers) - 1:
             for _ in range(layer):
                 output.append(Neuronio(
-                    { neuronio: peso_aleatorio() for neuronio in self.random_network(i + 1) },
+                    { neuronio: peso_aleatorio(max=sum(self.layers[:i])) for neuronio in self.random_network(i + 1) },
                     callback=self.proc_callback
                 ))
         
         elif i == 0:
             for _ in range(layer):
                 output.append(Neuronio(
-                    { neuronio: peso_aleatorio() for neuronio in self.random_network(i + 1) },
+                    { neuronio: peso_aleatorio(max=sum(self.layers[:i])) for neuronio in self.random_network(i + 1) },
                     callback=self.inpt_callback
                 ))
         else:
@@ -151,10 +152,9 @@ class RedeNeural:
         for neuronio in neuronios:
             novos_neuronios.update(neuronio.disparar())
 
-        if not novos_neuronios:
-            return novos_neuronios
-        
-        self.disparo_em_cadeia(a_partir_de=novos_neuronios)
+        if novos_neuronios:
+            self.disparo_em_cadeia(a_partir_de=novos_neuronios)
+
         return novos_neuronios
 
     def obter_saida(self) -> tuple[bool, ...]:
