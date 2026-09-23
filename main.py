@@ -1,3 +1,3 @@
-from openai import ia, OR, COOL
-ia.treinar(objetivo=COOL)
-print(ia)
+from openai import ia, EASY
+
+ia.treinar(EASY)
