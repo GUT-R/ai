@@ -27,6 +27,8 @@ class RandomInteger:
         return self.value > other
     def __ge__(self, other: int | float):
         return self.value >= other
+    def __repr__(self):
+        return str(self.value)
     def random(self):
         self.value = randint(0, self.max)
 
@@ -42,14 +44,16 @@ class Neuronio:
             return
         if self.callback:
             self.callback(self)
-        if not self.conexoes:
-            return
-        
+
+        should_reset = False
         for neuronio, peso in self.conexoes.items():
             if self.carga > peso:
                 neuronio.carga += self.carga
+                should_reset = True
                 yield neuronio
-        self.carga = 0.0
+        
+        if should_reset:
+            self.carga = 0.0
 
 
     def __str__(self):
@@ -168,8 +172,8 @@ class RedeNeural:
     def treinar(self, objetivo: Iterable[ tuple[tuple[bool, ...], tuple[bool, ...]] ]):
         concluido = False
         tentativa = 0
-        alcance = 0
-        objetivo_tam = len(objetivo) # type: ignore
+        sucessos = 0
+        tarefas = len(objetivo) # type: ignore
 
         while not concluido:
             concluido = True
@@ -181,10 +185,12 @@ class RedeNeural:
                     self.randomize_all()
                     concluido = False
                     break
-                alcance += 1
+                sucessos += 1
             print(f'Tentativa: {tentativa}')
-            print(f'Alcance: {(alcance / objetivo_tam) * 100}%')
+            print(f'Alcance: {(sucessos / tarefas) * 100}%')
             print(f'Possibilidades testadas: {len(self.weight_history)}')
+            print(f'Pesos: {self.teto_territory}', end='\n\n')
+
             tentativa += 1
 
     def __str__(self) -> str:
