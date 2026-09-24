@@ -37,11 +37,23 @@ AND = (
     ),
 )
 
-EASY = (
+BUILD_GTA_VI = (
+    (
+        (False, False),
+        (False, False),
+    ),
     (
         (False, True),
         (False, False)
     ),
+    (
+        (True, False),
+        (False, False),
+    ),
+    (
+        (True, True),
+        (False, False)
+    )
 )
 
 ia = RedeNeural((2, 2, 2, 2))
