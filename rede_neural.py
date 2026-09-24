@@ -2,9 +2,6 @@ from typing import Callable, Any, Optional, TypeVar, Iterable
 from random import randint, choice
 from string import ascii_lowercase, digits
 
-red   = '\033[31m'
-green = '\033[32m'
-reset = '\033[0m'
 ASCII = ascii_lowercase + digits
 
 _T = TypeVar('_T')
@@ -68,7 +65,7 @@ class Neuronio:
 
 def colorized_log(color: str):
     def wrapper(n: Neuronio):
-        print(f'{color}[{n.id} DISPARADO]{reset}')
+        print(f'{color}[{n.id} DISPARADO]\033[0m')
     return wrapper
 
 class RedeNeural:
