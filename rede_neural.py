@@ -54,7 +54,8 @@ class Neuronio:
         
         if should_reset:
             self.carga = 0.0
-
+    def reset(self):
+        self.carga = 0.0
 
     def __str__(self):
         return self.id
@@ -80,6 +81,7 @@ class RedeNeural:
         self.teto_territory: list[RandomInteger] = []
         self.max_charging: int = sum(layers)
         self.weight_history: set[str] = set()
+        self.neurons: set[Neuronio] = set()
         self.random_network()
         
 
@@ -115,22 +117,25 @@ class RedeNeural:
 
         if 0 < i < len(self.layers) - 1:
             for _ in range(layer):
-                output.append(Neuronio(
+                output.append(n := Neuronio(
                     { neuronio: peso_aleatorio(max=sum(self.layers[:i])) for neuronio in self.random_network(i + 1) },
                     callback=self.proc_callback
                 ))
+                self.neurons.add(n)
         
         elif i == 0:
             for _ in range(layer):
-                output.append(Neuronio(
-                    { neuronio: peso_aleatorio(max=sum(self.layers[:i])) for neuronio in self.random_network(i + 1) },
+                output.append(n := Neuronio(
+                    { neuronio: peso_aleatorio(1) for neuronio in self.random_network(i + 1) },
                     callback=self.inpt_callback
                 ))
+                self.neurons.add(n)
         else:
             for _ in range(layer):
-                output.append(Neuronio(
+                output.append(n := Neuronio(
                     {}, callback=self.otp_callback
                 ))
+                self.neurons.add(n)
         
         self.network[i] = output
         return output
@@ -184,6 +189,12 @@ class RedeNeural:
                     print(f'Saída diferente: {resultado} | {task=}')
                     self.randomize_all()
                     concluido = False
+                    
+                    print('Cargas restantes:', end=' ')
+                    for ne in self.neurons:
+                        print(ne.carga, end=' ')
+                        ne.reset()
+                    print()
                     break
                 sucessos += 1
             print(f'Tentativa: {tentativa}')
@@ -192,6 +203,7 @@ class RedeNeural:
             print(f'Pesos: {self.teto_territory}', end='\n\n')
 
             tentativa += 1
+            sucessos = 0
 
     def __str__(self) -> str:
         return '\nAinda não tem exibição, animal.\n'
