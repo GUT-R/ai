@@ -186,14 +186,14 @@ class RedeNeural:
                     print(f'Saída diferente: {resultado} | {task=}')
                     self.randomize_all()
                     concluido = False
-                    
-                    print('Cargas restantes:', end=' ')
-                    for ne in self.neurons:
-                        print(ne.carga, end=' ')
-                        ne.reset()
-                    print()
                     break
                 sucessos += 1
+            print("Cargas restantes:", end="")
+            for ne in self.neurons:
+                print(ne.carga, end="")
+                ne.reset()
+            print()
+
             print(f'Tentativa: {tentativa}')
             print(f'Alcance: {(sucessos / tarefas) * 100}%')
             print(f'Possibilidades testadas: {len(self.weight_history)}')
