@@ -88,16 +88,18 @@ class RedeNeural:
         return random_value
 
     def randomize_all(self):
+        possibilidades = 0
         while True: # do-while fez falta aqui
             l = ""
 
             for x in self.teto_territory:
                 x.random()
                 l += str(x.value) + ","
-            
+            possibilidades += 1
             if l not in self.weight_history:
                 break
         self.weight_history.add(l)
+        return possibilidades
 
     def random_network(self, i: int=0) -> list[Neuronio]:
         layer = self.layers[i]
@@ -176,7 +178,7 @@ class RedeNeural:
         tentativa = 0
         sucessos = 0
         tarefas = len(objetivo) # type: ignore
-
+        p = 0
         while not concluido:
             concluido = True
             for input, task in objetivo:
@@ -184,19 +186,19 @@ class RedeNeural:
                 resultado = self.obter_saida()
                 if resultado != task:
                     print(f'Saída diferente: {resultado} | {task=}')
-                    self.randomize_all()
+                    p += self.randomize_all()
                     concluido = False
                     break
                 sucessos += 1
-            print("Cargas restantes:", end="")
+            print("Cargas restantes:", end=" ")
             for ne in self.neurons:
-                print(ne.carga, end="")
+                print(ne.carga, end=", ")
                 ne.reset()
             print()
 
             print(f'Tentativa: {tentativa}')
             print(f'Alcance: {(sucessos / tarefas) * 100}%')
-            print(f'Possibilidades testadas: {len(self.weight_history)}')
+            print(f'Possibilidades testadas: {len(self.weight_history) + p}')
             print(f'Pesos: {self.teto_territory}', end='\n\n')
 
             tentativa += 1

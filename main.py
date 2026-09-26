@@ -1,3 +1,3 @@
-from openai import ia, BUILD_GTA_VI
+from openai import ia, OR
 
-ia.treinar(objetivo=BUILD_GTA_VI)
+ia.treinar(objetivo=OR)

@@ -3,7 +3,7 @@ from rede_neural import RedeNeural
 OR = (
     (
         (False, False),
-        (True, False)
+        (False, False)
     ),
     (
         (True, False),
@@ -18,18 +18,19 @@ OR = (
         (False, True)
     ),
 )
+
 AND = (
     (
         (False, False),
-        (True, False)
+        (False, False)
     ),
     (
         (True, False),
-        (True, False)
+        (False, False)
     ),
     (
         (False, True),
-        (True, False)
+        (False, False)
     ),
     (
         (True, True),
@@ -39,21 +40,25 @@ AND = (
 
 BUILD_GTA_VI = (
     (
-        (False, False),
+        (False, False, False),
         (False, False),
     ),
     (
-        (False, True),
-        (False, False)
-    ),
-    (
+        (True, False, False),
         (True, False),
-        (False, False),
     ),
     (
-        (True, True),
-        (False, False)
+        (True, False, True),
+        (True, False)
+    ),
+    (
+        (True, True, False),
+        (True, False),
+    ),
+    (
+        (True, True, True),
+        (True, True)
     )
 )
 
-ia = RedeNeural((2, 2, 2, 2))
+ia = RedeNeural((3, 20, 20, 2))
