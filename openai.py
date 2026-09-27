@@ -61,4 +61,4 @@ BUILD_GTA_VI = (
     )
 )
 
-ia = RedeNeural((3, 20, 20, 2))
+ia = RedeNeural((3, 4, 4, 2))
