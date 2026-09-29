@@ -1,6 +1,7 @@
 from typing import Callable, Any, Optional, TypeVar, Iterable
 from random import randint, choice
 from string import ascii_lowercase, digits
+import colors
 
 ASCII = ascii_lowercase + digits
 
@@ -17,10 +18,11 @@ def left(x: int):
 
 
 class RandomInteger:
-    def __init__(self, max: int = 10):
+    def __init__(self, max: int = 10, color: Optional[colors.Color]=None):
         self.value = 0
         self.max = max
         self.random()
+        self.color = color
 
     def __lt__(self, other: int | float):
         return self.value < other
@@ -35,6 +37,8 @@ class RandomInteger:
         return self.value >= other
 
     def __repr__(self):
+        if self.color:
+            return colors.rgb_text(self.color, str(self.value))
         return str(self.value)
 
     def random(self):
@@ -42,11 +46,12 @@ class RandomInteger:
 
 
 class Neuronio:
-    def __init__(self, conexoes: dict['Neuronio', float | int | RandomInteger], callback: Optional[NeuronCallback] = None):
+    def __init__(self, conexoes: dict['Neuronio', float | int | RandomInteger], callback: Optional[NeuronCallback] = None, color: Optional[colors.Color]=None):
         self.conexoes = conexoes
         self.callback = callback
         self.carga = 0.0
         self.id = simple_id()
+        self.color = color
 
     def disparar(self):
         if self.carga <= 0:
@@ -69,7 +74,10 @@ class Neuronio:
     
     @property
     def o(self):
-        return "●" if self.carga else "○"
+        o = "●" if self.carga else "○"
+        if self.color:
+            return colors.rgb_text(self.color, o)
+        return o
     
     def __str__(self):
         return self.__repr__()
@@ -100,8 +108,8 @@ class RedeNeural:
         self.neurons: set[Neuronio] = set()
         self.random_network()
 
-    def _random_weight(self, max: int):
-        random_value = RandomInteger(max)
+    def _random_weight(self, max: int, color: Optional[colors.Color]=None):
+        random_value = RandomInteger(max, color=color)
         self.teto_territory.append(random_value)
         return random_value
 
@@ -134,8 +142,11 @@ class RedeNeural:
             for _ in range(layer):
                 output.append(n := Neuronio(
                     {neuronio: peso_aleatorio(
-                        max=sum(self.layers[:i])) for neuronio in self.random_network(i + 1)},
-                    callback=self.proc_callback
+                        max=sum(self.layers[:i]),
+                        color=neuronio.color
+                    ) for neuronio in self.random_network(i + 1)},
+                    callback=self.proc_callback,
+                    color=colors.random_pastel()
                 ))
                 self.neurons.add(n)
 
@@ -143,14 +154,17 @@ class RedeNeural:
             for _ in range(layer):
                 output.append(n := Neuronio(
                     {neuronio: peso_aleatorio(
-                        1) for neuronio in self.random_network(i + 1)},
-                    callback=self.inpt_callback
+                        max=1, color=neuronio.color
+                    ) for neuronio in self.random_network(i + 1)},
+                    callback=self.inpt_callback,
+                    color=colors.random_pastel()
                 ))
                 self.neurons.add(n)
         else:
             for _ in range(layer):
                 output.append(n := Neuronio(
-                    {}, callback=self.otp_callback
+                    {}, callback=self.otp_callback,
+                    color=colors.random_pastel()
                 ))
                 self.neurons.add(n)
 
