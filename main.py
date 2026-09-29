@@ -5,6 +5,7 @@ ia.treinar(objetivo=OR)
 print(ia)
 
 ia.efetuar_input(
-    (True, True, False)
+    (True, True, False),
+    step_by_step=True
 )
 print(ia)

@@ -1,6 +1,7 @@
 from typing import Callable, Any, Optional, TypeVar, Iterable
 from random import randint, choice
 from string import ascii_lowercase, digits
+from subprocess import call
 import colors
 
 ASCII = ascii_lowercase + digits
@@ -114,6 +115,7 @@ class RedeNeural:
         return random_value
 
     def randomize_all(self):
+        attempts = 1
         while True:  # do-while fez falta aqui
             l = ""
 
@@ -123,7 +125,9 @@ class RedeNeural:
 
             if l not in self.weight_history:
                 break
+            attempts += 1
         self.weight_history.add(l)
+        return attempts
 
     def random_network(self, i: int = 0) -> list[Neuronio]:
         layer = self.layers[i]
@@ -180,7 +184,7 @@ class RedeNeural:
     def get(self, key: int, default: _T = None) -> list[Neuronio] | _T: # type: ignore
         return self.network.get(key, default)
 
-    def efetuar_input(self, input: tuple[bool, ...]):
+    def efetuar_input(self, input: tuple[bool, ...], step_by_step: bool=False):
         neuronios_de_entrada: set[Neuronio] = set()
 
         for neuronio, deve_ativar in zip(self.network[0], input):
@@ -188,17 +192,22 @@ class RedeNeural:
                 neuronio.carga += 1
                 neuronios_de_entrada.add(neuronio)
 
-        return self.disparo_em_cadeia(a_partir_de=neuronios_de_entrada)
-
-    def disparo_em_cadeia(self, a_partir_de: set[Neuronio]):
+        return self.disparo_em_cadeia(a_partir_de=neuronios_de_entrada, step_by_step=step_by_step)
+    def show(self):
+        call("clear")
+        print(self)
+        input()
+    def disparo_em_cadeia(self, a_partir_de: set[Neuronio], step_by_step: bool=False):
         neuronios = a_partir_de
         novos_neuronios: set[Neuronio] = set()
-
+        show = lambda: (self.show() if step_by_step else ...)
         for neuronio in neuronios:
+            show()
             novos_neuronios.update(neuronio.disparar())
+            show()
 
         if novos_neuronios:
-            self.disparo_em_cadeia(a_partir_de=novos_neuronios)
+            self.disparo_em_cadeia(a_partir_de=novos_neuronios, step_by_step=step_by_step)
 
         return novos_neuronios
 
@@ -209,6 +218,7 @@ class RedeNeural:
         concluido = False
         tentativa = 0
         sucessos = 0
+        possibilidades = 1
         tarefas = len(objetivo)  # type: ignore
 
         while not concluido:
@@ -218,7 +228,7 @@ class RedeNeural:
                 resultado = self.obter_saida()
                 if resultado != task:
                     print(f'Saída diferente: {resultado} | {task=}')
-                    self.randomize_all()
+                    possibilidades += self.randomize_all()
                     concluido = False
                     break
                 sucessos += 1
@@ -230,7 +240,7 @@ class RedeNeural:
 
             print(f'Tentativa: {tentativa}')
             print(f'Alcance: {(sucessos / tarefas) * 100}%')
-            print(f'Possibilidades testadas: {len(self.weight_history)}')
+            print(f'Possibilidades testadas: {possibilidades}')
             print(f'Pesos: {self.teto_territory}', end='\n\n')
 
             tentativa += 1
